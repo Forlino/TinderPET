@@ -201,7 +201,6 @@ export const Chat = ({ likedActions, allPets, onBack }: ChatProps) => {
         <div className="absolute top-20 left-20 w-64 h-64 bg-white rounded-full opacity-15 blur-3xl"></div>
         <div className="absolute bottom-20 right-20 w-80 h-80 bg-white rounded-full opacity-15 blur-3xl"></div>
       </div>
-      </div>
 
       <div className="relative z-10 w-full max-w-4xl mx-auto px-6 py-8">
         {/* Header */}
