@@ -277,7 +277,7 @@ export const DailyGoals = ({ onBack }: DailyGoalsProps) => {
                     <h3 className="text-2xl font-bold text-white text-center drop-shadow-lg">
                       {goal.title}
                     </h3>
-                    <p className="text-lg text-white/90 text-center mt-2">
+                    <p className="text-lg text-white font-medium text-center mt-2 drop-shadow-md">
                       {goal.description}
                     </p>
                   </div>
