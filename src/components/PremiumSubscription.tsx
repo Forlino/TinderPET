@@ -78,7 +78,9 @@ export const PremiumSubscription = ({
                 <h3 className="text-2xl font-bold text-white mb-3">
                   {feature.title}
                 </h3>
-                <p className="text-lg text-white/80">{feature.description}</p>
+                <p className="text-lg text-white font-medium">
+                  {feature.description}
+                </p>
               </motion.div>
             ))}
           </div>
