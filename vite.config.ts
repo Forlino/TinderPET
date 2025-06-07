@@ -21,35 +21,37 @@ export default defineConfig(({ mode }) => ({
     // Optimize chunk splitting
     rollupOptions: {
       output: {
-        manualChunks: {
-          // Separate vendor libraries into chunks
-          "vendor-react": ["react", "react-dom", "react-router-dom"],
-          "vendor-ui": [
-            "@radix-ui/react-accordion",
-            "@radix-ui/react-alert-dialog",
-            "@radix-ui/react-avatar",
-            "@radix-ui/react-button",
-            "@radix-ui/react-card",
-            "@radix-ui/react-dialog",
-            "@radix-ui/react-dropdown-menu",
-            "@radix-ui/react-label",
-            "@radix-ui/react-popover",
-            "@radix-ui/react-select",
-            "@radix-ui/react-separator",
-            "@radix-ui/react-switch",
-            "@radix-ui/react-tabs",
-            "@radix-ui/react-toast",
-            "@radix-ui/react-tooltip",
-          ],
-          "vendor-animation": ["framer-motion"],
-          "vendor-three": ["three", "@react-three/fiber"],
-          "vendor-form": ["react-hook-form", "@hookform/resolvers", "zod"],
-          "vendor-utils": [
-            "class-variance-authority",
-            "clsx",
-            "tailwind-merge",
-            "lucide-react",
-          ],
+        manualChunks: (id) => {
+          // Split vendor libraries into separate chunks
+          if (id.includes("node_modules")) {
+            if (
+              id.includes("react") ||
+              id.includes("react-dom") ||
+              id.includes("react-router")
+            ) {
+              return "vendor-react";
+            }
+            if (id.includes("@radix-ui") || id.includes("lucide-react")) {
+              return "vendor-ui";
+            }
+            if (id.includes("framer-motion")) {
+              return "vendor-animation";
+            }
+            if (id.includes("three") || id.includes("@react-three/fiber")) {
+              return "vendor-three";
+            }
+            if (id.includes("react-hook-form") || id.includes("zod")) {
+              return "vendor-form";
+            }
+            if (
+              id.includes("clsx") ||
+              id.includes("tailwind-merge") ||
+              id.includes("class-variance-authority")
+            ) {
+              return "vendor-utils";
+            }
+            return "vendor-other";
+          }
         },
       },
     },
