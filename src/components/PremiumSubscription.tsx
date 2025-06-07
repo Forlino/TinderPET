@@ -199,10 +199,10 @@ export const PremiumSubscription = ({
                         />
                         <span
                           className={cn(
-                            "text-left text-lg",
+                            "text-left text-lg font-medium",
                             selectedPlan === plan.id
-                              ? "text-gray-700"
-                              : "text-white/90",
+                              ? "text-gray-800"
+                              : "text-white",
                           )}
                         >
                           {feature}
