@@ -310,7 +310,7 @@ export const DailyGoals = ({ onBack }: DailyGoalsProps) => {
                           <span>
                             {goal.current} {goal.unit}
                           </span>
-                          <span className="text-white/70">
+                          <span className="text-white font-medium">
                             {goal.target} {goal.unit}
                           </span>
                         </div>
@@ -318,7 +318,7 @@ export const DailyGoals = ({ onBack }: DailyGoalsProps) => {
                           value={(goal.current / goal.target) * 100}
                           className="h-3 mb-2 bg-white/20"
                         />
-                        <p className="text-center text-sm text-white/80">
+                        <p className="text-center text-sm text-white font-medium">
                           {Math.round((goal.current / goal.target) * 100)}%
                           completado
                         </p>
