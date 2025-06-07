@@ -42,7 +42,7 @@ export default defineConfig(({ mode }) => ({
             "@radix-ui/react-tooltip",
           ],
           "vendor-animation": ["framer-motion"],
-          "vendor-three": ["three", "@react-three/fiber", "@types/three"],
+          "vendor-three": ["three", "@react-three/fiber"],
           "vendor-form": ["react-hook-form", "@hookform/resolvers", "zod"],
           "vendor-utils": [
             "class-variance-authority",
@@ -75,6 +75,6 @@ export default defineConfig(({ mode }) => ({
       "clsx",
       "tailwind-merge",
     ],
-    exclude: ["three", "@react-three/fiber"], // Heavy 3D libs - lazy load these
+    exclude: ["three", "@react-three/fiber", "@types/three"], // Heavy 3D libs - lazy load these
   },
 }));
