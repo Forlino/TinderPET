@@ -49,7 +49,7 @@ export const OutOfPetsModal = ({
   const canWatchMoreAds = getRemainingAds() > 0;
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-purple-900 via-pink-900 to-red-900 relative overflow-hidden flex items-center justify-center p-8">
+    <div className="min-h-screen w-full bg-gradient-to-br from-orange-500 via-yellow-500 to-red-600 relative overflow-hidden flex items-center justify-center p-8">
       {/* Animated background elements */}
       <div className="absolute inset-0">
         <div className="absolute top-20 left-20 w-72 h-72 bg-yellow-400 rounded-full opacity-20 blur-3xl animate-pulse"></div>
