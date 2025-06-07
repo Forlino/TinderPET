@@ -33,21 +33,23 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-// Lazy load heavy components to reduce initial bundle size
+// Lazy load optimized components to reduce initial bundle size
 const PetProfile = lazy(() =>
-  import("./PetProfile").then((m) => ({ default: m.PetProfile })),
+  import("./PetProfileOptimized").then((m) => ({ default: m.PetProfile })),
 );
 const MatchedPets = lazy(() =>
-  import("./MatchedPets").then((m) => ({ default: m.MatchedPets })),
+  import("./MatchedPetsOptimized").then((m) => ({ default: m.MatchedPets })),
 );
 const UserProfileForm = lazy(() =>
-  import("./UserProfileForm").then((m) => ({ default: m.UserProfileForm })),
+  import("./UserProfileFormOptimized").then((m) => ({
+    default: m.UserProfileForm,
+  })),
 );
 const UserProfileView = lazy(() =>
   import("./UserProfileView").then((m) => ({ default: m.UserProfileView })),
 );
 const PremiumSubscription = lazy(() =>
-  import("./PremiumSubscription").then((m) => ({
+  import("./PremiumSubscriptionOptimized").then((m) => ({
     default: m.PremiumSubscription,
   })),
 );
@@ -55,12 +57,16 @@ const PremiumSuccess = lazy(() =>
   import("./PremiumSuccess").then((m) => ({ default: m.PremiumSuccess })),
 );
 const DailyGoals = lazy(() =>
-  import("./DailyGoals").then((m) => ({ default: m.DailyGoals })),
+  import("./DailyGoalsOptimized").then((m) => ({ default: m.DailyGoals })),
 );
-const Chat = lazy(() => import("./Chat").then((m) => ({ default: m.Chat })));
+const Chat = lazy(() =>
+  import("./ChatOptimized").then((m) => ({ default: m.Chat })),
+);
 const Map = lazy(() => import("./Map").then((m) => ({ default: m.Map })));
 const OutOfPetsModal = lazy(() =>
-  import("./OutOfPetsModal").then((m) => ({ default: m.OutOfPetsModal })),
+  import("./OutOfPetsModalOptimized").then((m) => ({
+    default: m.OutOfPetsModal,
+  })),
 );
 
 // Lazy load framer-motion for better initial load
