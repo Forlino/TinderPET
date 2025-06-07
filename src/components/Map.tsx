@@ -367,7 +367,7 @@ export const Map = ({ onBack }: MapProps) => {
                     Servicios de ubicación
                   </p>
                   <p>
-                    • <strong>Móvil:</strong> Permite el acceso a la ubicación
+                    • <strong>M��vil:</strong> Permite el acceso a la ubicación
                     en la configuración del navegador
                   </p>
                 </div>
