@@ -71,7 +71,6 @@ export const MatchedPets = ({
                   <p className="text-3xl lg:text-4xl xl:text-5xl text-white font-medium">
                     ¡Empieza a dar like para encontrar tu compañero perfecto!
                   </p>
-                </p>
                 <motion.div
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
