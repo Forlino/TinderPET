@@ -148,8 +148,22 @@ export const Map = ({ onBack }: MapProps) => {
       return;
     }
 
+    // Timeout adicional como fallback
+    const timeoutId = setTimeout(() => {
+      console.warn("⚠️ Timeout adicional de geolocalización activado");
+      setMapState((prev) => ({
+        ...prev,
+        isLoading: false,
+        error:
+          "Se agotó el tiempo para obtener tu ubicación. Mostrando todas las ubicaciones disponibles.",
+        pointsOfInterest: mockPointsOfInterest,
+      }));
+    }, 25000); // 25 segundos como fallback total
+
     navigator.geolocation.getCurrentPosition(
       (position) => {
+        clearTimeout(timeoutId); // Limpiar timeout si la geolocalización es exitosa
+
         console.log("✅ Geolocalización exitosa:", {
           latitud: position.coords.latitude,
           longitud: position.coords.longitude,
@@ -189,6 +203,8 @@ export const Map = ({ onBack }: MapProps) => {
         }));
       },
       (error) => {
+        clearTimeout(timeoutId); // Limpiar timeout si hay error
+
         // Ensure we have a proper error object
         const safeError = error || { code: 0, message: "Error desconocido" };
         const errorMessage = getGeolocationErrorMessage(safeError);
@@ -214,23 +230,6 @@ export const Map = ({ onBack }: MapProps) => {
       },
     );
 
-    // Agregar timeout adicional como fallback
-    const timeoutId = setTimeout(() => {
-      console.warn("⚠️ Timeout adicional de geolocalización activado");
-      setMapState((prev) => ({
-        ...prev,
-        isLoading: false,
-        error:
-          "Se agotó el tiempo para obtener tu ubicación. Mostrando todas las ubicaciones disponibles.",
-        pointsOfInterest: mockPointsOfInterest,
-      }));
-    }, 25000); // 25 segundos como fallback total
-
-    // Limpiar timeout si todo sale bien
-    const originalSuccess = (position: GeolocationPosition) => {
-      clearTimeout(timeoutId);
-      // ... resto del código de success
-    };
     setTimeout(() => {
       if (mapState.isLoading) {
         console.warn(
@@ -364,7 +363,7 @@ export const Map = ({ onBack }: MapProps) => {
                     variant="outline"
                     className="bg-white text-orange-700 border-orange-300 hover:bg-orange-50 rounded-xl"
                   >
-                    Continuar sin ubicación
+                    Continuar sin ubicaci��n
                   </Button>
                 </div>
               </div>
