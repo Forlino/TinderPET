@@ -130,13 +130,18 @@ export const MatchedPets = ({
                               scale: [1, 1.2, 1],
                               rotate: [0, 360],
                             }}
+                            transition={{
+                              duration: 4,
+                              repeat: Infinity,
+                              ease: "linear",
+                            }}
+                          >
+                            💖
+                          </motion.div>
+                        </div>
                         <p className="text-lg lg:text-xl text-white mb-4 font-medium drop-shadow-md">
                           {pet.description}
                         </p>
-                                duration: 4,
-                                repeat: Infinity,
-                                ease: "linear",
-                              },
                             }}
                             className="bg-gradient-to-r from-red-500 to-pink-600 text-white p-4 lg:p-5 rounded-full shadow-2xl backdrop-blur-md border border-white/30"
                           >
