@@ -339,7 +339,9 @@ export const Map = ({ onBack }: MapProps) => {
                   Problema con la ubicación
                 </h3>
                 <p className="mb-4 text-orange-700 whitespace-pre-line">
-                  {mapState.error}
+                  {typeof mapState.error === "string"
+                    ? mapState.error
+                    : "Error al obtener la ubicación. Mostrando todas las ubicaciones disponibles."}
                 </p>
                 <div className="flex gap-3">
                   <Button
@@ -363,7 +365,7 @@ export const Map = ({ onBack }: MapProps) => {
                     variant="outline"
                     className="bg-white text-orange-700 border-orange-300 hover:bg-orange-50 rounded-xl"
                   >
-                    Continuar sin ubicaci��n
+                    Continuar sin ubicación
                   </Button>
                 </div>
               </div>
