@@ -68,8 +68,9 @@ export const MatchedPets = ({
                 <h2 className="text-6xl lg:text-7xl xl:text-8xl font-black text-white mb-8 drop-shadow-2xl">
                   Aún no has dado "like" a ningún animal
                 </h2>
-                <p className="text-3xl lg:text-4xl xl:text-5xl text-white/90 mb-16">
-                  ¡Empieza a explorar y encuentra tu compañero perfecto!
+                  <p className="text-3xl lg:text-4xl xl:text-5xl text-white font-medium">
+                    ¡Empieza a dar like para encontrar tu compañero perfecto!
+                  </p>
                 </p>
                 <motion.div
                   whileHover={{ scale: 1.05 }}
@@ -98,7 +99,7 @@ export const MatchedPets = ({
                     {likedPets.length !== 1 ? "es" : ""} te{" "}
                     {likedPets.length !== 1 ? "han" : "ha"} conquistado
                   </h2>
-                  <p className="text-3xl lg:text-4xl xl:text-5xl text-white/90">
+                  <p className="text-3xl lg:text-4xl xl:text-5xl text-white font-medium">
                     ¡Estos son los animales que te han enamorado!
                   </p>
                 </div>
@@ -130,10 +131,9 @@ export const MatchedPets = ({
                               scale: [1, 1.2, 1],
                               rotate: [0, 360],
                             }}
-                            transition={{
-                              duration: 2,
-                              repeat: Infinity,
-                              rotate: {
+                        <p className="text-lg lg:text-xl text-white mb-4 font-medium drop-shadow-md">
+                          {pet.description}
+                        </p>
                                 duration: 4,
                                 repeat: Infinity,
                                 ease: "linear",
