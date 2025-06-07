@@ -334,7 +334,9 @@ export const PetMatcher = () => {
     return (
       <Suspense fallback={<ComponentLoader children={undefined} />}>
         <MatchedPets
-          likedActions={likedPets}
+          likedActions={swipeHistory.filter(
+            (action) => action.action === "like",
+          )}
           allPets={pets}
           onBack={handleBackToMatching}
           onViewProfile={handleViewProfile}
