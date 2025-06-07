@@ -101,7 +101,7 @@ export const Map = ({ onBack }: MapProps) => {
       case 3: // TIMEOUT
         return "Se agotó el tiempo para obtener tu ubicación. Esto puede deberse a:\n• Señal GPS débil\n• Dispositivo en interior sin acceso a GPS\n• Intenta nuevamente en unos segundos";
       default:
-        return `Error desconocido (código ${error.code}) al obtener la ubicación. Mostrando todas las ubicaciones disponibles.`;
+        return `Error al obtener la ubicación${errorCode ? ` (código ${errorCode})` : ""}${errorMessage ? `: ${errorMessage}` : ""}. Mostrando todas las ubicaciones disponibles.`;
     }
   };
 
@@ -215,6 +215,22 @@ export const Map = ({ onBack }: MapProps) => {
     );
 
     // Agregar timeout adicional como fallback
+    const timeoutId = setTimeout(() => {
+      console.warn("⚠️ Timeout adicional de geolocalización activado");
+      setMapState((prev) => ({
+        ...prev,
+        isLoading: false,
+        error:
+          "Se agotó el tiempo para obtener tu ubicación. Mostrando todas las ubicaciones disponibles.",
+        pointsOfInterest: mockPointsOfInterest,
+      }));
+    }, 25000); // 25 segundos como fallback total
+
+    // Limpiar timeout si todo sale bien
+    const originalSuccess = (position: GeolocationPosition) => {
+      clearTimeout(timeoutId);
+      // ... resto del código de success
+    };
     setTimeout(() => {
       if (mapState.isLoading) {
         console.warn(
