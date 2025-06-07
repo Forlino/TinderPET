@@ -130,20 +130,9 @@ export const MatchedPets = ({
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
                         <div className="absolute top-4 right-4">
-                          <motion.div
-                            animate={{
-                              scale: [1, 1.2, 1],
-                              rotate: [0, 360],
-                            }}
-                            transition={{
-                              duration: 4,
-                              repeat: Infinity,
-                              ease: "linear",
-                            }}
-                            className="bg-gradient-to-r from-red-500 to-pink-600 text-white p-4 lg:p-5 rounded-full shadow-2xl backdrop-blur-md border border-white/30"
-                          >
+                          <div className="bg-gradient-to-r from-red-500 to-pink-600 text-white p-4 lg:p-5 rounded-full shadow-2xl backdrop-blur-md border border-white/30">
                             <Heart className="w-8 h-8 lg:w-10 lg:h-10 fill-current" />
-                          </motion.div>
+                          </div>
                         </div>
                         <div className="absolute bottom-0 left-0 right-0 p-6 lg:p-8">
                           <h3 className="text-2xl lg:text-3xl font-black text-white mb-2 drop-shadow-xl">
@@ -153,11 +142,14 @@ export const MatchedPets = ({
                             {pet.breed}
                           </span>
                         </div>
-                        <p className="text-lg lg:text-xl text-white mb-4 font-medium drop-shadow-md p-6">
+                      </div>
+                      {/* Pet details section outside the image */}
+                      <div className="p-6 lg:p-8">
+                        <p className="text-lg lg:text-xl text-white mb-4 font-medium drop-shadow-md">
                           {pet.description}
                         </p>
 
-                        <div className="flex items-center gap-2 text-base lg:text-lg text-white mb-6 p-6">
+                        <div className="flex items-center gap-2 text-base lg:text-lg text-white">
                           <MapPin className="w-5 h-5 lg:w-6 lg:h-6" />
                           <span className="font-medium">{pet.location}</span>
                         </div>
