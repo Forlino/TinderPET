@@ -77,7 +77,7 @@ export const Map = ({ onBack }: MapProps) => {
   }, []);
 
   const getGeolocationErrorMessage = (
-    error: GeolocationPositionError,
+    error: GeolocationPositionError | any,
   ): string => {
     const errorCodes = {
       1: "PERMISSION_DENIED",
@@ -85,11 +85,15 @@ export const Map = ({ onBack }: MapProps) => {
       3: "TIMEOUT",
     };
 
+    // Handle cases where error might not be a proper GeolocationPositionError
+    const errorCode = error?.code ?? 0;
+    const errorMessage = error?.message ?? "Error desconocido";
+
     console.log(
-      `Código de error de geolocalización: ${error.code} (${errorCodes[error.code as keyof typeof errorCodes] || "UNKNOWN"})`,
+      `Código de error de geolocalización: ${errorCode} (${errorCodes[errorCode as keyof typeof errorCodes] || "UNKNOWN"}) - ${errorMessage}`,
     );
 
-    switch (error.code) {
+    switch (errorCode) {
       case 1: // PERMISSION_DENIED
         return "Acceso a la ubicación denegado. Para habilitar:\n• Haz clic en el ícono de ubicación 📍 en la barra de direcciones\n• Selecciona 'Permitir' cuando aparezca el mensaje\n• Recarga la página después de cambiar los permisos";
       case 2: // POSITION_UNAVAILABLE
@@ -185,11 +189,15 @@ export const Map = ({ onBack }: MapProps) => {
         }));
       },
       (error) => {
-        const errorMessage = getGeolocationErrorMessage(error);
+        // Ensure we have a proper error object
+        const safeError = error || { code: 0, message: "Error desconocido" };
+        const errorMessage = getGeolocationErrorMessage(safeError);
+
         console.error("❌ Error de geolocalización:", {
-          código: error.code,
-          mensaje: error.message,
+          código: safeError.code,
+          mensaje: safeError.message,
           descripción: errorMessage,
+          errorCompleto: error,
         });
 
         setMapState((prev) => ({
