@@ -195,7 +195,7 @@ export const Chat = ({ likedActions, allPets, onBack }: ChatProps) => {
   }
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-yellow-400 via-orange-500 to-purple-600 relative overflow-hidden">
+    <div className="min-h-screen w-full bg-gradient-to-br from-blue-500 via-teal-600 to-indigo-700 relative overflow-hidden">
       {/* Static background - no animations */}
       <div className="absolute inset-0">
         <div className="absolute top-20 left-20 w-64 h-64 bg-white rounded-full opacity-15 blur-3xl"></div>
