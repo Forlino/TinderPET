@@ -446,7 +446,9 @@ export const PetMatcher = () => {
           }}
           onGoToPremium={() => setViewState("premium")}
           onRestart={() => setViewState("matches")}
-          likedPetsCount={likedPets.length}
+          likedPetsCount={
+            swipeHistory.filter((action) => action.action === "like").length
+          }
         />
       </Suspense>
     );
