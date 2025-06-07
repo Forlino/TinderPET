@@ -110,33 +110,10 @@ export const DailyGoals = ({ onBack }: DailyGoalsProps) => {
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-emerald-500 via-teal-600 to-cyan-700 relative overflow-hidden">
-      {/* Animated background elements */}
+      {/* Static background - no animations */}
       <div className="absolute inset-0">
-        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-green-600/30 via-teal-600/20 to-blue-600/30"></div>
-        <div className="absolute top-20 left-20 w-72 h-72 bg-gradient-to-r from-lime-400 to-emerald-500 rounded-full opacity-20 blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-20 w-96 h-96 bg-gradient-to-r from-cyan-400 to-teal-500 rounded-full opacity-20 blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-r from-green-400 to-emerald-500 rounded-full opacity-15 blur-3xl animate-pulse delay-500"></div>
-
-        {/* Floating particles */}
-        {[...Array(15)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-2 h-2 bg-white rounded-full opacity-40"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-            }}
-            animate={{
-              y: [0, -100, 0],
-              opacity: [0.4, 0.8, 0.4],
-            }}
-            transition={{
-              duration: 3 + Math.random() * 2,
-              repeat: Infinity,
-              delay: Math.random() * 2,
-            }}
-          />
-        ))}
+        <div className="absolute top-20 left-20 w-64 h-64 bg-white rounded-full opacity-15 blur-3xl"></div>
+        <div className="absolute bottom-20 right-20 w-80 h-80 bg-white rounded-full opacity-15 blur-3xl"></div>
       </div>
 
       <div className="relative z-10 max-w-6xl mx-auto p-8">
@@ -157,12 +134,9 @@ export const DailyGoals = ({ onBack }: DailyGoalsProps) => {
                 animate={{ opacity: 1, x: 0 }}
                 className="text-5xl lg:text-6xl font-black text-white drop-shadow-2xl flex items-center gap-4"
               >
-                <motion.span
-                  animate={{ rotate: [0, 360] }}
-                  transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-                >
-                  🎯
-                </motion.span>
+                <div>
+                  <Target className="w-16 h-16 text-white drop-shadow-lg" />
+                </div>
                 Objetivos Diarios
               </motion.h1>
               <p className="text-2xl text-white/90 mt-2 drop-shadow-lg">
