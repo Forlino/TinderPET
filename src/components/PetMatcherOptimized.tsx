@@ -1,4 +1,11 @@
-import { useState, useEffect, useMemo, useCallback, lazy, Suspense } from "react";
+import {
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+  lazy,
+  Suspense,
+} from "react";
 import { Pet, SwipeAction } from "@/types/pet";
 import { UserProfile } from "@/types/user";
 import { PremiumPlan } from "@/types/premium";
@@ -27,20 +34,48 @@ import {
 import { cn } from "@/lib/utils";
 
 // Lazy load optimized components to reduce initial bundle size
-const PetProfile = lazy(() => import("./PetProfileOptimized").then(m => ({ default: m.PetProfile })));
-const MatchedPets = lazy(() => import("./MatchedPetsOptimized").then(m => ({ default: m.MatchedPets })));
-const UserProfileForm = lazy(() => import("./UserProfileFormOptimized").then(m => ({ default: m.UserProfileForm })));
-const UserProfileView = lazy(() => import("./UserProfileView").then(m => ({ default: m.UserProfileView })));
-const PremiumSubscription = lazy(() => import("./PremiumSubscriptionOptimized").then(m => ({ default: m.PremiumSubscription })));
-const PremiumSuccess = lazy(() => import("./PremiumSuccess").then(m => ({ default: m.PremiumSuccess })));
-const DailyGoals = lazy(() => import("./DailyGoalsOptimized").then(m => ({ default: m.DailyGoals })));
-const Chat = lazy(() => import("./ChatOptimized").then(m => ({ default: m.Chat })));
-const Map = lazy(() => import("./Map").then(m => ({ default: m.Map })));
-const OutOfPetsModal = lazy(() => import("./OutOfPetsModalOptimized").then(m => ({ default: m.OutOfPetsModal })));
+const PetProfile = lazy(() =>
+  import("./PetProfileOptimized").then((m) => ({ default: m.PetProfile })),
+);
+const MatchedPets = lazy(() =>
+  import("./MatchedPetsOptimized").then((m) => ({ default: m.MatchedPets })),
+);
+const UserProfileForm = lazy(() =>
+  import("./UserProfileFormOptimized").then((m) => ({
+    default: m.UserProfileForm,
+  })),
+);
+const UserProfileView = lazy(() =>
+  import("./UserProfileView").then((m) => ({ default: m.UserProfileView })),
+);
+const PremiumSubscription = lazy(() =>
+  import("./PremiumSubscriptionOptimized").then((m) => ({
+    default: m.PremiumSubscription,
+  })),
+);
+const PremiumSuccess = lazy(() =>
+  import("./PremiumSuccess").then((m) => ({ default: m.PremiumSuccess })),
+);
+const DailyGoals = lazy(() =>
+  import("./DailyGoalsOptimized").then((m) => ({ default: m.DailyGoals })),
+);
+const Chat = lazy(() =>
+  import("./ChatOptimized").then((m) => ({ default: m.Chat })),
+);
+const Map = lazy(() => import("./Map").then((m) => ({ default: m.Map })));
+const OutOfPetsModal = lazy(() =>
+  import("./OutOfPetsModalOptimized").then((m) => ({
+    default: m.OutOfPetsModal,
+  })),
+);
 
 // Lazy load framer-motion for better initial load
-const LazyMotion = lazy(() => import("framer-motion").then(m => ({ default: m.motion })));
-const LazyAnimatePresence = lazy(() => import("framer-motion").then(m => ({ default: m.AnimatePresence })));
+const LazyMotion = lazy(() =>
+  import("framer-motion").then((m) => ({ default: m.motion })),
+);
+const LazyAnimatePresence = lazy(() =>
+  import("framer-motion").then((m) => ({ default: m.AnimatePresence })),
+);
 
 // Loading component for lazy loaded components
 const ComponentLoader = ({ children }: { children: React.ReactNode }) => (
@@ -94,19 +129,24 @@ export const PetMatcher = () => {
   // Memoized calculations to avoid unnecessary re-renders
   const likedPets = useMemo(
     () => swipeHistory.filter((action) => action.action === "like"),
-    [swipeHistory]
+    [swipeHistory],
   );
 
-  const currentPet = useMemo(() => pets[currentPetIndex], [pets, currentPetIndex]);
+  const currentPet = useMemo(
+    () => pets[currentPetIndex],
+    [pets, currentPetIndex],
+  );
 
   const hasMorePets = useMemo(
-    () => currentPetIndex < pets.length && (isPremium || totalSwipes < availableSwipes),
-    [currentPetIndex, pets.length, isPremium, totalSwipes, availableSwipes]
+    () =>
+      currentPetIndex < pets.length &&
+      (isPremium || totalSwipes < availableSwipes),
+    [currentPetIndex, pets.length, isPremium, totalSwipes, availableSwipes],
   );
 
   const shouldShowAd = useMemo(
     () => totalSwipes > 0 && totalSwipes % 5 === 0 && !isPremium,
-    [totalSwipes, isPremium]
+    [totalSwipes, isPremium],
   );
 
   const currentAd = useMemo(() => {
@@ -127,7 +167,7 @@ export const PetMatcher = () => {
     tomorrow.setDate(tomorrow.getDate() + 1);
     tomorrow.setHours(0, 0, 0, 0);
     const hoursUntilReset = Math.ceil(
-      (tomorrow.getTime() - now.getTime()) / (1000 * 60 * 60)
+      (tomorrow.getTime() - now.getTime()) / (1000 * 60 * 60),
     );
 
     return {
@@ -151,53 +191,65 @@ export const PetMatcher = () => {
   }, [dailyLimit.date, updateDailyLimit]);
 
   // Optimized swipe handler with useCallback
-  const handleSwipe = useCallback((direction: "left" | "right") => {
-    if (isAnimating) return;
+  const handleSwipe = useCallback(
+    (direction: "left" | "right") => {
+      if (isAnimating) return;
 
-    if (!isPremium && totalSwipes >= availableSwipes) {
-      setViewState("out-of-pets");
-      return;
-    }
-
-    if (shouldShowAd) {
-      setIsAnimating(true);
-      setTotalSwipes((prev) => prev + 1);
-      setTimeout(() => setIsAnimating(false), 300);
-      return;
-    }
-
-    if (!currentPet) {
-      setViewState("out-of-pets");
-      return;
-    }
-
-    setIsAnimating(true);
-
-    const action: SwipeAction = {
-      petId: currentPet.id,
-      action: direction === "right" ? "like" : "dislike",
-      timestamp: new Date(),
-    };
-
-    setSwipeHistory((prev) => [...prev, action]);
-    setTotalSwipes((prev) => prev + 1);
-
-    setTimeout(() => {
-      const nextIndex = currentPetIndex + 1;
-      const nextTotalSwipes = totalSwipes + 1;
-
-      setCurrentPetIndex(nextIndex);
-
-      if (
-        nextIndex >= pets.length ||
-        (!isPremium && nextTotalSwipes >= availableSwipes)
-      ) {
+      if (!isPremium && totalSwipes >= availableSwipes) {
         setViewState("out-of-pets");
+        return;
       }
 
-      setIsAnimating(false);
-    }, 300);
-  }, [isAnimating, isPremium, totalSwipes, availableSwipes, shouldShowAd, currentPet, currentPetIndex, pets.length]);
+      if (shouldShowAd) {
+        setIsAnimating(true);
+        setTotalSwipes((prev) => prev + 1);
+        setTimeout(() => setIsAnimating(false), 300);
+        return;
+      }
+
+      if (!currentPet) {
+        setViewState("out-of-pets");
+        return;
+      }
+
+      setIsAnimating(true);
+
+      const action: SwipeAction = {
+        petId: currentPet.id,
+        action: direction === "right" ? "like" : "dislike",
+        timestamp: new Date(),
+      };
+
+      setSwipeHistory((prev) => [...prev, action]);
+      setTotalSwipes((prev) => prev + 1);
+
+      setTimeout(() => {
+        const nextIndex = currentPetIndex + 1;
+        const nextTotalSwipes = totalSwipes + 1;
+
+        setCurrentPetIndex(nextIndex);
+
+        if (
+          nextIndex >= pets.length ||
+          (!isPremium && nextTotalSwipes >= availableSwipes)
+        ) {
+          setViewState("out-of-pets");
+        }
+
+        setIsAnimating(false);
+      }, 300);
+    },
+    [
+      isAnimating,
+      isPremium,
+      totalSwipes,
+      availableSwipes,
+      shouldShowAd,
+      currentPet,
+      currentPetIndex,
+      pets.length,
+    ],
+  );
 
   // Other handlers with useCallback for optimization
   const handleUndo = useCallback(() => {
@@ -233,14 +285,18 @@ export const PetMatcher = () => {
   }, []);
 
   // Navigation handlers
-  const navigationHandlers = useMemo(() => ({
-    handleViewMatches: () => setViewState("matches"),
-    handleViewUserProfile: () => setViewState(userProfile ? "user-profile" : "edit-user-profile"),
-    handleViewPremium: () => setViewState("premium"),
-    handleViewDailyGoals: () => setViewState("daily-goals"),
-    handleViewChat: () => setViewState("chat"),
-    handleViewMap: () => setViewState("map"),
-  }), [userProfile]);
+  const navigationHandlers = useMemo(
+    () => ({
+      handleViewMatches: () => setViewState("matches"),
+      handleViewUserProfile: () =>
+        setViewState(userProfile ? "user-profile" : "edit-user-profile"),
+      handleViewPremium: () => setViewState("premium"),
+      handleViewDailyGoals: () => setViewState("daily-goals"),
+      handleViewChat: () => setViewState("chat"),
+      handleViewMap: () => setViewState("map"),
+    }),
+    [userProfile],
+  );
 
   // Render different view states with lazy loading
   if (viewState === "profile" && selectedPet) {
@@ -408,7 +464,8 @@ export const PetMatcher = () => {
               ¡Completado!
             </h2>
             <p className="text-3xl lg:text-4xl text-white/90 mb-12">
-              Has dado "like" a {likedPets.length} mascota{likedPets.length !== 1 ? "s" : ""}
+              Has dado "like" a {likedPets.length} mascota
+              {likedPets.length !== 1 ? "s" : ""}
             </p>
             <div className="flex gap-6 justify-center">
               <Button
@@ -439,9 +496,8 @@ export const PetMatcher = () => {
     <div className="min-h-screen w-full bg-gradient-to-br from-rose-400 via-pink-500 to-purple-600 relative overflow-hidden">
       {/* Ultra-simplified static background */}
       <div className="absolute inset-0">
-        <div className="absolute top-20 left-20 w-80 h-80 bg-white rounded-full opacity-10 blur-3xl"></div>
-        <div className="absolute bottom-20 right-20 w-96 h-96 bg-white rounded-full opacity-10 blur-3xl"></div>
-      </div>
+        <div className="absolute top-20 left-20 w-64 h-64 bg-white rounded-full opacity-15 blur-3xl"></div>
+        <div className="absolute bottom-20 right-20 w-80 h-80 bg-white rounded-full opacity-15 blur-3xl"></div>
       </div>
 
       <div className="relative z-10 w-full max-w-6xl mx-auto px-8 py-12">
@@ -612,11 +668,19 @@ export const PetMatcher = () => {
         </div>
 
         {/* Simplified card stack */}
-        <div className="relative w-full max-w-5xl mx-auto mb-16" style={{ height: "1000px" }}>
+        <div
+          className="relative w-full max-w-5xl mx-auto mb-16"
+          style={{ height: "1000px" }}
+        >
           {(hasMorePets || shouldShowAd) && (
             <>
               {shouldShowAd && currentAd && (
-                <div className="absolute inset-0" style={{ filter: "drop-shadow(0 25px 50px rgba(0, 0, 0, 0.3))" }}>
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    filter: "drop-shadow(0 25px 50px rgba(0, 0, 0, 0.3))",
+                  }}
+                >
                   <SwipeableCard
                     key={`ad-${currentAd.id}-${totalSwipes}`}
                     onSwipe={handleSwipe}
@@ -632,11 +696,19 @@ export const PetMatcher = () => {
                 <>
                   {pets[currentPetIndex + 1] && (
                     <div className="absolute inset-0 blur-sm opacity-60 scale-90">
-                      <PetCard pet={pets[currentPetIndex + 1]} className="w-full h-full" />
+                      <PetCard
+                        pet={pets[currentPetIndex + 1]}
+                        className="w-full h-full"
+                      />
                     </div>
                   )}
 
-                  <div className="absolute inset-0" style={{ filter: "drop-shadow(0 25px 50px rgba(0, 0, 0, 0.3))" }}>
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      filter: "drop-shadow(0 25px 50px rgba(0, 0, 0, 0.3))",
+                    }}
+                  >
                     <SwipeableCard
                       key={currentPet.id}
                       onSwipe={handleSwipe}
@@ -660,7 +732,10 @@ export const PetMatcher = () => {
             size="lg"
             className="w-40 h-40 lg:w-48 lg:h-48 rounded-full bg-white/20 backdrop-blur-md border-4 border-red-400/50 hover:border-red-400 hover:bg-red-500/20 shadow-2xl transition-all duration-300 group"
           >
-            <X className="w-36 h-36 lg:w-40 lg:h-40 text-red-500 group-hover:text-red-400 transition-colors" strokeWidth={3} />
+            <X
+              className="w-36 h-36 lg:w-40 lg:h-40 text-red-500 group-hover:text-red-400 transition-colors"
+              strokeWidth={3}
+            />
           </Button>
 
           <Button
@@ -669,7 +744,10 @@ export const PetMatcher = () => {
             size="lg"
             className="w-32 h-32 lg:w-40 lg:h-40 rounded-full bg-white/20 backdrop-blur-md border-3 border-gray-400/50 hover:border-gray-400 hover:bg-gray-500/20 shadow-xl transition-all duration-300 group"
           >
-            <RotateCcw className="w-28 h-28 lg:w-32 lg:h-32 text-gray-400 group-hover:text-gray-300 transition-colors" strokeWidth={3} />
+            <RotateCcw
+              className="w-28 h-28 lg:w-32 lg:h-32 text-gray-400 group-hover:text-gray-300 transition-colors"
+              strokeWidth={3}
+            />
           </Button>
 
           <Button
@@ -678,7 +756,10 @@ export const PetMatcher = () => {
             size="lg"
             className="w-40 h-40 lg:w-48 lg:h-48 rounded-full bg-white/20 backdrop-blur-md border-4 border-green-400/50 hover:border-green-400 hover:bg-green-500/20 shadow-2xl transition-all duration-300 group"
           >
-            <Heart className="w-36 h-36 lg:w-40 lg:h-40 text-green-500 group-hover:text-green-400 transition-colors fill-current" strokeWidth={3} />
+            <Heart
+              className="w-36 h-36 lg:w-40 lg:h-40 text-green-500 group-hover:text-green-400 transition-colors fill-current"
+              strokeWidth={3}
+            />
           </Button>
         </div>
       </div>
