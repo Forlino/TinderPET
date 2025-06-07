@@ -76,34 +76,7 @@ export const Map = ({ onBack }: MapProps) => {
     getCurrentLocation();
   }, []);
 
-  const getGeolocationErrorMessage = (
-    error: GeolocationPositionError | any,
-  ): string => {
-    const errorCodes = {
-      1: "PERMISSION_DENIED",
-      2: "POSITION_UNAVAILABLE",
-      3: "TIMEOUT",
-    };
 
-    // Handle cases where error might not be a proper GeolocationPositionError
-    const errorCode = error?.code ?? 0;
-    const errorMessage = error?.message ?? "Error desconocido";
-
-    console.log(
-      `Código de error de geolocalización: ${errorCode} (${errorCodes[errorCode as keyof typeof errorCodes] || "UNKNOWN"}) - ${errorMessage}`,
-    );
-
-    switch (errorCode) {
-      case 1: // PERMISSION_DENIED
-        return "Acceso a la ubicación denegado. Para habilitar:\n• Haz clic en el ícono de ubicación 📍 en la barra de direcciones\n• Selecciona 'Permitir' cuando aparezca el mensaje\n• Recarga la página después de cambiar los permisos";
-      case 2: // POSITION_UNAVAILABLE
-        return "No se pudo determinar tu ubicación. Esto puede suceder por:\n• Conexión GPS débil (intenta salir al exterior)\n• Problemas de conectividad a internet\n• Servicios de ubicación deshabilitados en el dispositivo";
-      case 3: // TIMEOUT
-        return "Se agotó el tiempo para obtener tu ubicación. Esto puede deberse a:\n• Señal GPS débil\n• Dispositivo en interior sin acceso a GPS\n• Intenta nuevamente en unos segundos";
-      default:
-        return `Error al obtener la ubicación${errorCode ? ` (código ${errorCode})` : ""}${errorMessage ? `: ${errorMessage}` : ""}. Mostrando todas las ubicaciones disponibles.`;
-    }
-  };
 
   const getCurrentLocation = () => {
     setMapState((prev) => ({ ...prev, isLoading: true, error: null }));
@@ -111,15 +84,14 @@ export const Map = ({ onBack }: MapProps) => {
     // Debug info
     console.log("Iniciando geolocalización...", {
       protocolo: location.protocol,
-      hostname: location.hostname,
-      navegador: navigator.userAgent.slice(0, 50) + "...",
-      geolocationDisponible: !!navigator.geolocation,
+      geolocationDisponible: isGeolocationSupported(),
+      contextoSeguro: isSecureContext(),
     });
 
     // Check if geolocation is available
-    if (!navigator.geolocation) {
+    if (!isGeolocationSupported()) {
       const message =
-        "La geolocalización no está disponible en este navegador. Esto puede ocurrir en navegadores muy antiguos o en modo privado/incógnito.";
+        "Tu navegador no soporta geolocalización. Mostrando todas las ubicaciones disponibles.";
       console.error("Geolocalización no disponible");
       setMapState((prev) => ({
         ...prev,
@@ -130,12 +102,8 @@ export const Map = ({ onBack }: MapProps) => {
       return;
     }
 
-    // Check if we're on HTTPS (required for geolocation in many browsers)
-    if (
-      location.protocol !== "https:" &&
-      location.hostname !== "localhost" &&
-      location.hostname !== "127.0.0.1"
-    ) {
+    // Check if we're in a secure context (required for geolocation in many browsers)
+    if (!isSecureContext()) {
       const message =
         "La geolocalización requiere una conexión segura (HTTPS) en la mayoría de navegadores modernos. También funciona en localhost para desarrollo.";
       console.error("Protocolo inseguro detectado:", location.protocol);
@@ -147,6 +115,7 @@ export const Map = ({ onBack }: MapProps) => {
       }));
       return;
     }
+    }
 
     // Timeout adicional como fallback
     const timeoutId = setTimeout(() => {
@@ -154,8 +123,7 @@ export const Map = ({ onBack }: MapProps) => {
       setMapState((prev) => ({
         ...prev,
         isLoading: false,
-        error:
-          "Se agotó el tiempo para obtener tu ubicación. Mostrando todas las ubicaciones disponibles.",
+        error: "Se agotó el tiempo para obtener tu ubicación. Mostrando todas las ubicaciones disponibles.",
         pointsOfInterest: mockPointsOfInterest,
       }));
     }, 25000); // 25 segundos como fallback total
@@ -213,7 +181,7 @@ export const Map = ({ onBack }: MapProps) => {
           código: safeError.code,
           mensaje: safeError.message,
           descripción: errorMessage,
-          errorCompleto: error,
+          errorCompleto: error
         });
 
         setMapState((prev) => ({
@@ -223,12 +191,9 @@ export const Map = ({ onBack }: MapProps) => {
           pointsOfInterest: mockPointsOfInterest,
         }));
       },
-      {
-        enableHighAccuracy: false, // false para mejor compatibilidad y velocidad
-        timeout: 20000, // 20 segundos para dar más tiempo
-        maximumAge: 300000, // 5 minutos - usa ubicación cacheada si está disponible
-      },
+      getGeolocationOptions(),
     );
+
 
     setTimeout(() => {
       if (mapState.isLoading) {
@@ -339,9 +304,10 @@ export const Map = ({ onBack }: MapProps) => {
                   Problema con la ubicación
                 </h3>
                 <p className="mb-4 text-orange-700 whitespace-pre-line">
-                  {typeof mapState.error === "string"
+                  {typeof mapState.error === 'string'
                     ? mapState.error
-                    : "Error al obtener la ubicación. Mostrando todas las ubicaciones disponibles."}
+                    : 'Error al obtener la ubicación. Mostrando todas las ubicaciones disponibles.'
+                  }
                 </p>
                 <div className="flex gap-3">
                   <Button
