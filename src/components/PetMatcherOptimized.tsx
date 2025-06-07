@@ -62,7 +62,7 @@ const DailyGoals = lazy(() =>
 const Chat = lazy(() =>
   import("./ChatOptimized").then((m) => ({ default: m.Chat })),
 );
-const Map = lazy(() => import("./Map").then((m) => ({ default: m.Map })));
+const Map = lazy(() => import("./MapFixed").then((m) => ({ default: m.Map })));
 const OutOfPetsModal = lazy(() =>
   import("./OutOfPetsModalOptimized").then((m) => ({
     default: m.OutOfPetsModal,
