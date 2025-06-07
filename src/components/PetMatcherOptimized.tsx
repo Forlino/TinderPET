@@ -512,10 +512,25 @@ export const PetMatcher = () => {
             </h1>
 
             {isPremium && (
-              <div className="flex items-center bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 text-black px-6 py-3 rounded-2xl shadow-2xl border-2 border-white/30">
-                <Crown className="w-10 h-10 mr-3" />
+              <div
+                className="flex items-center bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 text-black px-6 py-3 rounded-2xl shadow-2xl border-2 border-white/30"
+                style={{
+                  animation: "float 3s ease-in-out infinite",
+                }}
+              >
+                <Crown
+                  className="w-10 h-10 mr-3"
+                  style={{
+                    animation: "heartbeat 1.5s ease-in-out infinite",
+                  }}
+                />
                 <span className="text-3xl font-black">PREMIUM</span>
-                <Sparkles className="w-8 h-8 ml-2" />
+                <Sparkles
+                  className="w-8 h-8 ml-2"
+                  style={{
+                    animation: "sparkle 2s ease-in-out infinite",
+                  }}
+                />
               </div>
             )}
           </div>
