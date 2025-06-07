@@ -1,4 +1,4 @@
-import { PetMatcher } from "@/components/PetMatcher";
+import { PetMatcher } from "@/components/PetMatcherOptimized";
 
 const Index = () => {
   return <PetMatcher />;
