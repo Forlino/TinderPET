@@ -499,12 +499,12 @@ export const PetMatcher = () => {
         <div className="text-center mb-12 pt-8">
           <div className="flex items-center justify-center gap-6">
             <div className="relative w-24 h-24 lg:w-32 lg:h-32">
-              <div className="absolute inset-0 bg-gradient-to-br from-pink-400 via-rose-500 to-purple-600 rounded-3xl shadow-2xl">
-                <div className="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent rounded-3xl" />
-              </div>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <PawPrint className="w-12 h-12 lg:w-16 lg:h-16 text-white fill-current drop-shadow-lg" />
-              </div>
+              <img
+                loading="lazy"
+                srcSet="https://cdn.builder.io/api/v1/image/assets%2Fd666cf8b2f7d4cf9a049ba067cc979a3%2F7ee69d82b68a4fc7838c059042485670?width=100 100w, https://cdn.builder.io/api/v1/image/assets%2Fd666cf8b2f7d4cf9a049ba067cc979a3%2F7ee69d82b68a4fc7838c059042485670?width=200 200w, https://cdn.builder.io/api/v1/image/assets%2Fd666cf8b2f7d4cf9a049ba067cc979a3%2F7ee69d82b68a4fc7838c059042485670?width=400 400w, https://cdn.builder.io/api/v1/image/assets%2Fd666cf8b2f7d4cf9a049ba067cc979a3%2F7ee69d82b68a4fc7838c059042485670?width=800 800w, https://cdn.builder.io/api/v1/image/assets%2Fd666cf8b2f7d4cf9a049ba067cc979a3%2F7ee69d82b68a4fc7838c059042485670?width=1200 1200w, https://cdn.builder.io/api/v1/image/assets%2Fd666cf8b2f7d4cf9a049ba067cc979a3%2F7ee69d82b68a4fc7838c059042485670?width=1600 1600w, https://cdn.builder.io/api/v1/image/assets%2Fd666cf8b2f7d4cf9a049ba067cc979a3%2F7ee69d82b68a4fc7838c059042485670?width=2000 2000w, https://cdn.builder.io/api/v1/image/assets%2Fd666cf8b2f7d4cf9a049ba067cc979a3%2F7ee69d82b68a4fc7838c059042485670"
+                className="w-full h-full object-cover object-center"
+                alt="PetMatch Logo"
+              />
             </div>
 
             <h1 className="text-7xl lg:text-9xl font-black bg-gradient-to-r from-white via-pink-100 to-rose-200 bg-clip-text text-transparent drop-shadow-2xl">
