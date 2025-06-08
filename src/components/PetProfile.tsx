@@ -68,7 +68,7 @@ export const PetProfile = ({
   return (
     <div
       className={cn(
-        "w-full min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden",
+        "w-full min-h-screen bg-gradient-to-br from-indigo-600 via-purple-600 to-blue-700 relative overflow-hidden",
         className,
       )}
     >

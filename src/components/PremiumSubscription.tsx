@@ -26,7 +26,7 @@ export const PremiumSubscription = ({
   };
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-purple-900 via-pink-900 to-red-900 relative overflow-hidden">
+    <div className="min-h-screen w-full bg-gradient-to-br from-orange-500 via-yellow-500 to-red-600 relative overflow-hidden">
       {/* Animated background elements */}
       <div className="absolute inset-0">
         <div className="absolute top-20 left-20 w-72 h-72 bg-yellow-400 rounded-full opacity-20 blur-3xl animate-pulse"></div>
@@ -78,7 +78,9 @@ export const PremiumSubscription = ({
                 <h3 className="text-2xl font-bold text-white mb-3">
                   {feature.title}
                 </h3>
-                <p className="text-lg text-white/80">{feature.description}</p>
+                <p className="text-lg text-white font-medium">
+                  {feature.description}
+                </p>
               </motion.div>
             ))}
           </div>
@@ -197,10 +199,10 @@ export const PremiumSubscription = ({
                         />
                         <span
                           className={cn(
-                            "text-left text-lg",
+                            "text-left text-lg font-medium",
                             selectedPlan === plan.id
-                              ? "text-gray-700"
-                              : "text-white/90",
+                              ? "text-gray-800"
+                              : "text-white",
                           )}
                         >
                           {feature}

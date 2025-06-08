@@ -195,12 +195,11 @@ export const Chat = ({ likedActions, allPets, onBack }: ChatProps) => {
   }
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-rose-400 via-pink-500 to-purple-600 relative overflow-hidden">
-      {/* Animated background */}
+    <div className="min-h-screen w-full bg-gradient-to-br from-gray-100 via-white to-gray-200 relative overflow-hidden">
+      {/* Static background - no animations */}
       <div className="absolute inset-0">
-        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-pink-600/30 via-purple-600/20 to-indigo-600/30"></div>
-        <div className="absolute top-20 left-20 w-72 h-72 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full opacity-20 blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-20 w-96 h-96 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full opacity-20 blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-20 left-20 w-64 h-64 bg-gray-300 rounded-full opacity-20 blur-3xl"></div>
+        <div className="absolute bottom-20 right-20 w-80 h-80 bg-gray-300 rounded-full opacity-20 blur-3xl"></div>
       </div>
 
       <div className="relative z-10 w-full max-w-4xl mx-auto px-6 py-8">
@@ -215,34 +214,27 @@ export const Chat = ({ likedActions, allPets, onBack }: ChatProps) => {
               onClick={onBack}
               variant="ghost"
               size="lg"
-              className="text-white hover:bg-white/20 backdrop-blur-md rounded-2xl p-4"
+              className="text-gray-700 hover:bg-gray-200/50 backdrop-blur-md rounded-2xl p-4"
             >
               <ArrowLeft className="w-6 h-6" />
             </Button>
             <div className="flex items-center gap-4">
-              <motion.div
-                animate={{ rotate: [0, 10, -10, 0] }}
-                transition={{ duration: 2, repeat: Infinity }}
-              >
-                <MessageCircle className="w-12 h-12 text-white drop-shadow-lg" />
-              </motion.div>
               <div>
-                <h1 className="text-4xl lg:text-5xl font-black text-white drop-shadow-lg">
+                <MessageCircle className="w-12 h-12 text-gray-700 drop-shadow-lg" />
+              </div>
+              <div>
+                <h1 className="text-4xl lg:text-5xl font-black text-gray-800 drop-shadow-lg">
                   Chats
                 </h1>
-                <p className="text-xl text-white/90">Habla con tus matches</p>
+                <p className="text-xl text-gray-600">Habla con tus matches</p>
               </div>
             </div>
           </div>
 
           {totalUnreadCount > 0 && (
-            <motion.div
-              animate={{ scale: [1, 1.1, 1] }}
-              transition={{ duration: 1, repeat: Infinity }}
-              className="bg-red-500 text-white px-4 py-2 rounded-full font-bold text-lg shadow-lg"
-            >
+            <div className="bg-red-500 text-white px-4 py-2 rounded-full font-bold text-lg shadow-lg">
               {totalUnreadCount} nuevos
-            </motion.div>
+            </div>
           )}
         </motion.div>
 
@@ -254,13 +246,13 @@ export const Chat = ({ likedActions, allPets, onBack }: ChatProps) => {
           className="mb-8"
         >
           <div className="relative">
-            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-6 h-6 text-white/60" />
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-500" />
             <input
               type="text"
               placeholder="Buscar conversaciones..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-white/20 backdrop-blur-xl border border-white/30 rounded-2xl pl-14 pr-6 py-4 text-white placeholder-white/60 text-lg focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent"
+              className="w-full bg-white/70 backdrop-blur-xl border border-gray-300 rounded-2xl pl-14 pr-6 py-4 text-gray-800 placeholder-gray-500 text-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent"
             />
           </div>
         </motion.div>
@@ -273,20 +265,14 @@ export const Chat = ({ likedActions, allPets, onBack }: ChatProps) => {
           className="space-y-4"
         >
           {filteredConversations.length === 0 ? (
-            <Card className="bg-white/20 backdrop-blur-xl border border-white/30 rounded-3xl p-12 text-center">
-              <motion.div
-                animate={{ scale: [1, 1.1, 1] }}
-                transition={{ duration: 2, repeat: Infinity }}
-                className="text-8xl mb-6"
-              >
-                💬
-              </motion.div>
-              <h3 className="text-3xl font-bold text-white mb-4">
+            <Card className="bg-white/70 backdrop-blur-xl border border-gray-300 rounded-3xl p-12 text-center">
+              <div className="text-8xl mb-6">💬</div>
+              <h3 className="text-3xl font-bold text-gray-800 mb-4">
                 {conversations.length === 0
                   ? "¡No hay matches aún!"
                   : "No se encontraron conversaciones"}
               </h3>
-              <p className="text-xl text-white/80">
+              <p className="text-xl text-gray-600">
                 {conversations.length === 0
                   ? "Dale like a algunas mascotas para empezar a chatear"
                   : "Intenta con otro término de búsqueda"}
@@ -306,11 +292,11 @@ export const Chat = ({ likedActions, allPets, onBack }: ChatProps) => {
                   onClick={() => handleConversationSelect(conversation.id)}
                   className="cursor-pointer"
                 >
-                  <Card className="bg-white/20 backdrop-blur-xl border border-white/30 rounded-3xl p-6 hover:bg-white/30 transition-all duration-300 group">
+                  <Card className="bg-white/70 backdrop-blur-xl border border-gray-300 rounded-3xl p-6 hover:bg-white/90 transition-all duration-300 group">
                     <div className="flex items-center gap-6">
                       {/* Pet avatar */}
                       <div className="relative">
-                        <div className="w-20 h-20 lg:w-24 lg:h-24 rounded-2xl overflow-hidden ring-4 ring-white/30 group-hover:ring-white/50 transition-all duration-300">
+                        <div className="w-20 h-20 lg:w-24 lg:h-24 rounded-2xl overflow-hidden ring-4 ring-gray-300 group-hover:ring-gray-400 transition-all duration-300">
                           <img
                             src={conversation.petPhoto}
                             alt={conversation.petName}
@@ -318,24 +304,20 @@ export const Chat = ({ likedActions, allPets, onBack }: ChatProps) => {
                           />
                         </div>
                         {conversation.unreadCount > 0 && (
-                          <motion.div
-                            animate={{ scale: [1, 1.2, 1] }}
-                            transition={{ duration: 1, repeat: Infinity }}
-                            className="absolute -top-2 -right-2 bg-red-500 text-white text-sm rounded-full w-8 h-8 flex items-center justify-center font-bold shadow-lg border-2 border-white"
-                          >
+                          <div className="absolute -top-2 -right-2 bg-red-500 text-white text-sm rounded-full w-8 h-8 flex items-center justify-center font-bold shadow-lg border-2 border-white">
                             {conversation.unreadCount}
-                          </motion.div>
+                          </div>
                         )}
                       </div>
 
                       {/* Conversation info */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between mb-2">
-                          <h3 className="text-2xl font-bold text-white truncate group-hover:text-pink-100 transition-colors">
+                          <h3 className="text-2xl font-bold text-gray-800 truncate group-hover:text-pink-600 transition-colors">
                             {conversation.petName}
                           </h3>
                           {conversation.lastMessage && (
-                            <span className="text-white/60 text-sm">
+                            <span className="text-gray-500 text-sm">
                               {new Date(
                                 conversation.lastMessage.timestamp,
                               ).toLocaleTimeString([], {
@@ -351,8 +333,8 @@ export const Chat = ({ likedActions, allPets, onBack }: ChatProps) => {
                             className={cn(
                               "text-lg truncate",
                               conversation.unreadCount > 0
-                                ? "text-white font-semibold"
-                                : "text-white/70",
+                                ? "text-gray-800 font-semibold"
+                                : "text-gray-600",
                             )}
                           >
                             {conversation.lastMessage.senderId === "user" &&
@@ -360,28 +342,24 @@ export const Chat = ({ likedActions, allPets, onBack }: ChatProps) => {
                             {conversation.lastMessage.content}
                           </p>
                         ) : (
-                          <p className="text-white/60 text-lg italic">
+                          <p className="text-gray-500 text-lg italic">
                             ¡Empezar conversación!
                           </p>
                         )}
 
                         {/* Match indicator */}
                         <div className="flex items-center gap-2 mt-2">
-                          <Heart className="w-4 h-4 text-pink-400 fill-current" />
-                          <span className="text-pink-300 text-sm font-medium">
+                          <Heart className="w-4 h-4 text-pink-500 fill-current" />
+                          <span className="text-pink-600 text-sm font-medium">
                             Match confirmado
                           </span>
                         </div>
                       </div>
 
                       {/* Arrow indicator */}
-                      <motion.div
-                        animate={{ x: [0, 5, 0] }}
-                        transition={{ duration: 2, repeat: Infinity }}
-                        className="text-white/60 group-hover:text-white transition-colors"
-                      >
+                      <div className="text-gray-500 group-hover:text-gray-700 transition-colors">
                         <MoreHorizontal className="w-6 h-6" />
-                      </motion.div>
+                      </div>
                     </div>
                   </Card>
                 </motion.div>
@@ -398,9 +376,9 @@ export const Chat = ({ likedActions, allPets, onBack }: ChatProps) => {
             transition={{ delay: 0.6 }}
             className="mt-8 text-center"
           >
-            <div className="bg-white/20 backdrop-blur-xl border border-white/30 rounded-2xl p-6 inline-block">
-              <p className="text-white/80 text-lg">
-                <span className="font-bold text-white">
+            <div className="bg-white/70 backdrop-blur-xl border border-gray-300 rounded-2xl p-6 inline-block">
+              <p className="text-gray-600 text-lg">
+                <span className="font-bold text-gray-800">
                   {conversations.length}
                 </span>{" "}
                 conversaciones activas

@@ -110,33 +110,10 @@ export const DailyGoals = ({ onBack }: DailyGoalsProps) => {
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-emerald-500 via-teal-600 to-cyan-700 relative overflow-hidden">
-      {/* Animated background elements */}
+      {/* Static background - no animations */}
       <div className="absolute inset-0">
-        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-green-600/30 via-teal-600/20 to-blue-600/30"></div>
-        <div className="absolute top-20 left-20 w-72 h-72 bg-gradient-to-r from-lime-400 to-emerald-500 rounded-full opacity-20 blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-20 w-96 h-96 bg-gradient-to-r from-cyan-400 to-teal-500 rounded-full opacity-20 blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-r from-green-400 to-emerald-500 rounded-full opacity-15 blur-3xl animate-pulse delay-500"></div>
-
-        {/* Floating particles */}
-        {[...Array(15)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-2 h-2 bg-white rounded-full opacity-40"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-            }}
-            animate={{
-              y: [0, -100, 0],
-              opacity: [0.4, 0.8, 0.4],
-            }}
-            transition={{
-              duration: 3 + Math.random() * 2,
-              repeat: Infinity,
-              delay: Math.random() * 2,
-            }}
-          />
-        ))}
+        <div className="absolute top-20 left-20 w-64 h-64 bg-white rounded-full opacity-15 blur-3xl"></div>
+        <div className="absolute bottom-20 right-20 w-80 h-80 bg-white rounded-full opacity-15 blur-3xl"></div>
       </div>
 
       <div className="relative z-10 max-w-6xl mx-auto p-8">
@@ -157,12 +134,9 @@ export const DailyGoals = ({ onBack }: DailyGoalsProps) => {
                 animate={{ opacity: 1, x: 0 }}
                 className="text-5xl lg:text-6xl font-black text-white drop-shadow-2xl flex items-center gap-4"
               >
-                <motion.span
-                  animate={{ rotate: [0, 360] }}
-                  transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-                >
-                  🎯
-                </motion.span>
+                <div>
+                  <Target className="w-16 h-16 text-white drop-shadow-lg" />
+                </div>
                 Objetivos Diarios
               </motion.h1>
               <p className="text-2xl text-white/90 mt-2 drop-shadow-lg">
@@ -187,37 +161,41 @@ export const DailyGoals = ({ onBack }: DailyGoalsProps) => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
-          <Card className="p-8 mb-12 bg-white/20 backdrop-blur-xl border border-white/30 shadow-2xl text-white">
+          <Card className="p-8 mb-12 bg-white border border-gray-300 shadow-2xl text-gray-800">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
               <div className="text-center">
-                <div className="text-4xl font-bold mb-2">
+                <div className="text-4xl font-bold mb-2 text-gray-800">
                   {completedGoals}/{totalGoals}
                 </div>
-                <div className="text-lg opacity-90">Objetivos Completados</div>
+                <div className="text-lg text-gray-600">
+                  Objetivos Completados
+                </div>
               </div>
               <div className="text-center">
-                <div className="text-4xl font-bold mb-2">
+                <div className="text-4xl font-bold mb-2 text-gray-800">
                   {completionPercentage}%
                 </div>
-                <div className="text-lg opacity-90">Progreso del Día</div>
+                <div className="text-lg text-gray-600">Progreso del Día</div>
               </div>
               <div className="text-center">
-                <div className="text-4xl font-bold mb-2">
+                <div className="text-4xl font-bold mb-2 text-gray-800">
                   🔥 {Math.max(...goals.map((g) => g.streak))}
                 </div>
-                <div className="text-lg opacity-90">Mejor Racha</div>
+                <div className="text-lg text-gray-600">Mejor Racha</div>
               </div>
               <div className="text-center">
-                <div className="text-4xl font-bold mb-2">
+                <div className="text-4xl font-bold mb-2 text-gray-800">
                   ⭐ {goals.filter((g) => g.streak > 7).length}
                 </div>
-                <div className="text-lg opacity-90">Hábitos Establecidos</div>
+                <div className="text-lg text-gray-600">
+                  Hábitos Establecidos
+                </div>
               </div>
             </div>
             <div className="mt-6">
               <Progress
                 value={completionPercentage}
-                className="h-4 bg-white/20"
+                className="h-4 bg-gray-200"
               />
             </div>
           </Card>
@@ -266,10 +244,10 @@ export const DailyGoals = ({ onBack }: DailyGoalsProps) => {
               >
                 <Card
                   className={cn(
-                    "p-6 relative overflow-hidden transition-all duration-300 hover:shadow-2xl backdrop-blur-xl border border-white/30",
+                    "p-6 relative overflow-hidden transition-all duration-300 hover:shadow-2xl border border-gray-300",
                     goal.completed
-                      ? "bg-white/30 shadow-xl"
-                      : "bg-white/20 hover:bg-white/25",
+                      ? "bg-white shadow-xl"
+                      : "bg-white hover:bg-gray-50",
                   )}
                 >
                   {/* Priority Badge */}
@@ -300,10 +278,10 @@ export const DailyGoals = ({ onBack }: DailyGoalsProps) => {
                   {/* Goal Icon and Title */}
                   <div className="mb-6 mt-8">
                     <div className="text-6xl mb-4 text-center">{goal.icon}</div>
-                    <h3 className="text-2xl font-bold text-white text-center drop-shadow-lg">
+                    <h3 className="text-2xl font-bold text-gray-800 text-center">
                       {goal.title}
                     </h3>
-                    <p className="text-lg text-white/90 text-center mt-2">
+                    <p className="text-lg text-gray-600 font-medium text-center mt-2">
                       {goal.description}
                     </p>
                   </div>
@@ -314,10 +292,10 @@ export const DailyGoals = ({ onBack }: DailyGoalsProps) => {
                       <div className="text-center">
                         <div
                           className={cn(
-                            "w-20 h-20 rounded-full border-4 flex items-center justify-center mx-auto mb-4 transition-all backdrop-blur-md",
+                            "w-20 h-20 rounded-full border-4 flex items-center justify-center mx-auto mb-4 transition-all",
                             goal.completed
-                              ? "border-green-400 bg-green-500/50 text-white"
-                              : "border-white/50 text-white/60 hover:border-green-400/50",
+                              ? "border-green-400 bg-green-100 text-green-600"
+                              : "border-gray-300 text-gray-500 hover:border-green-400",
                           )}
                         >
                           {goal.completed ? (
@@ -326,25 +304,25 @@ export const DailyGoals = ({ onBack }: DailyGoalsProps) => {
                             <Clock className="w-10 h-10" />
                           )}
                         </div>
-                        <p className="text-lg font-medium text-white">
+                        <p className="text-lg font-medium text-gray-700">
                           {goal.completed ? "¡Completado!" : "Pendiente"}
                         </p>
                       </div>
                     ) : (
                       <div>
-                        <div className="flex justify-between text-lg font-medium mb-2 text-white">
+                        <div className="flex justify-between text-lg font-medium mb-2 text-gray-700">
                           <span>
                             {goal.current} {goal.unit}
                           </span>
-                          <span className="text-white/70">
+                          <span className="text-gray-700 font-medium">
                             {goal.target} {goal.unit}
                           </span>
                         </div>
                         <Progress
                           value={(goal.current / goal.target) * 100}
-                          className="h-3 mb-2 bg-white/20"
+                          className="h-3 mb-2 bg-gray-200"
                         />
-                        <p className="text-center text-sm text-white/80">
+                        <p className="text-center text-sm text-gray-600 font-medium">
                           {Math.round((goal.current / goal.target) * 100)}%
                           completado
                         </p>
@@ -358,10 +336,10 @@ export const DailyGoals = ({ onBack }: DailyGoalsProps) => {
                       <Button
                         onClick={() => toggleGoalCompletion(goal.id)}
                         className={cn(
-                          "flex-1 text-lg py-3 backdrop-blur-md border border-white/30",
+                          "flex-1 text-lg py-3 border",
                           goal.completed
-                            ? "bg-green-500/80 hover:bg-green-600/80 text-white"
-                            : "bg-blue-500/80 hover:bg-blue-600/80 text-white",
+                            ? "bg-green-500 hover:bg-green-600 text-white border-green-500"
+                            : "bg-blue-500 hover:bg-blue-600 text-white border-blue-500",
                         )}
                       >
                         {goal.completed ? (
@@ -381,7 +359,7 @@ export const DailyGoals = ({ onBack }: DailyGoalsProps) => {
                         <Button
                           onClick={() => updateGoalProgress(goal.id, 1)}
                           disabled={goal.completed}
-                          className="flex-1 text-lg py-3 bg-white/20 hover:bg-white/30 text-white backdrop-blur-md border border-white/30"
+                          className="flex-1 text-lg py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 border border-gray-300"
                         >
                           <Plus className="w-5 h-5 mr-2" />
                           +1
@@ -394,7 +372,7 @@ export const DailyGoals = ({ onBack }: DailyGoalsProps) => {
                             )
                           }
                           disabled={goal.completed}
-                          className="flex-1 bg-blue-500/80 hover:bg-blue-600/80 text-white text-lg py-3 backdrop-blur-md"
+                          className="flex-1 bg-blue-500 hover:bg-blue-600 text-white text-lg py-3 border border-blue-500"
                         >
                           <Check className="w-5 h-5 mr-2" />
                           Completar
@@ -405,7 +383,7 @@ export const DailyGoals = ({ onBack }: DailyGoalsProps) => {
 
                   {/* Completion Time */}
                   {goal.completedAt && (
-                    <p className="text-center text-sm text-green-300 mt-3">
+                    <p className="text-center text-sm text-green-600 mt-3">
                       ✅ Completado a las{" "}
                       {goal.completedAt.toLocaleTimeString("es-ES", {
                         hour: "2-digit",
@@ -425,48 +403,48 @@ export const DailyGoals = ({ onBack }: DailyGoalsProps) => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.0 }}
         >
-          <Card className="mt-12 p-8 bg-white/20 backdrop-blur-xl border border-white/30 shadow-2xl">
-            <h2 className="text-3xl font-bold text-white mb-6 text-center drop-shadow-lg">
+          <Card className="mt-12 p-8 bg-white border border-gray-300 shadow-2xl">
+            <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">
               📊 Resumen del Día
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
               <div>
-                <div className="text-3xl font-bold text-purple-300">
+                <div className="text-3xl font-bold text-purple-600">
                   {
                     goals.filter(
                       (g) => g.category === "exercise" && g.completed,
                     ).length
                   }
                 </div>
-                <div className="text-white/80">Ejercicio</div>
+                <div className="text-gray-600">Ejercicio</div>
               </div>
               <div>
-                <div className="text-3xl font-bold text-green-300">
+                <div className="text-3xl font-bold text-green-600">
                   {
                     goals.filter(
                       (g) => g.category === "nutrition" && g.completed,
                     ).length
                   }
                 </div>
-                <div className="text-white/80">Alimentación</div>
+                <div className="text-gray-600">Alimentación</div>
               </div>
               <div>
-                <div className="text-3xl font-bold text-blue-300">
+                <div className="text-3xl font-bold text-blue-600">
                   {
                     goals.filter((g) => g.category === "health" && g.completed)
                       .length
                   }
                 </div>
-                <div className="text-white/80">Salud</div>
+                <div className="text-gray-600">Salud</div>
               </div>
               <div>
-                <div className="text-3xl font-bold text-pink-300">
+                <div className="text-3xl font-bold text-pink-600">
                   {
                     goals.filter((g) => g.category === "play" && g.completed)
                       .length
                   }
                 </div>
-                <div className="text-white/80">Juego</div>
+                <div className="text-gray-600">Juego</div>
               </div>
             </div>
           </Card>

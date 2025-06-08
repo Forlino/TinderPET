@@ -1,72 +1,50 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  getGeolocationErrorMessage,
+  isGeolocationSupported,
+  isSecureContext,
+  getGeolocationOptions,
+} from "@/utils/geolocation";
+import { PetPointOfInterest, UserLocation } from "@/types/map";
+import { mockPointsOfInterest } from "@/data/mapData";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   ArrowLeft,
   MapPin,
   Navigation,
+  Filter,
+  Loader2,
+  AlertCircle,
+  Info,
+  HelpCircle,
   Phone,
-  Globe,
   Clock,
   Star,
   Heart,
   Shield,
-  Users,
-  Trees,
-  ShoppingBag,
-  Stethoscope,
-  AlertCircle,
-  Loader2,
-  Info,
-  HelpCircle,
-  PawPrint,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { PetPointOfInterest, UserLocation, MapState } from "@/types/map";
-import { mockPointsOfInterest, calculateDistance } from "@/data/mapData";
+
+interface MapState {
+  userLocation: UserLocation | null;
+  pointsOfInterest: PetPointOfInterest[];
+  selectedPoint: PetPointOfInterest | null;
+  isLoading: boolean;
+  error: string | null;
+}
 
 interface MapProps {
   onBack: () => void;
 }
 
-const typeIcons = {
-  veterinary: Stethoscope,
-  shelter: Shield,
-  meetup: Users,
-  park: Trees,
-  store: ShoppingBag,
-};
-
-const typeColors = {
-  veterinary: "from-red-500 to-pink-600",
-  shelter: "from-blue-500 to-purple-600",
-  meetup: "from-green-500 to-emerald-600",
-  park: "from-yellow-500 to-orange-600",
-  store: "from-purple-500 to-indigo-600",
-};
-
-const typeLabels = {
-  veterinary: "Veterinaria",
-  shelter: "Refugio",
-  meetup: "Encuentro",
-  park: "Parque",
-  store: "Tienda",
-};
-
 export const Map = ({ onBack }: MapProps) => {
   const [mapState, setMapState] = useState<MapState>({
     userLocation: null,
-    pointsOfInterest: [],
+    pointsOfInterest: mockPointsOfInterest,
     selectedPoint: null,
-    isLoading: true,
+    isLoading: false,
     error: null,
   });
 
@@ -76,29 +54,24 @@ export const Map = ({ onBack }: MapProps) => {
     getCurrentLocation();
   }, []);
 
-  const getGeolocationErrorMessage = (
-    error: GeolocationPositionError,
-  ): string => {
-    const errorCodes = {
-      1: "PERMISSION_DENIED",
-      2: "POSITION_UNAVAILABLE",
-      3: "TIMEOUT",
-    };
-
-    console.log(
-      `Código de error de geolocalización: ${error.code} (${errorCodes[error.code as keyof typeof errorCodes] || "UNKNOWN"})`,
-    );
-
-    switch (error.code) {
-      case 1: // PERMISSION_DENIED
-        return "Acceso a la ubicación denegado. Para habilitar:\n• Haz clic en el ícono de ubicación 📍 en la barra de direcciones\n• Selecciona 'Permitir' cuando aparezca el mensaje\n• Recarga la página después de cambiar los permisos";
-      case 2: // POSITION_UNAVAILABLE
-        return "No se pudo determinar tu ubicación. Esto puede suceder por:\n• Conexión GPS débil (intenta salir al exterior)\n• Problemas de conectividad a internet\n• Servicios de ubicación deshabilitados en el dispositivo";
-      case 3: // TIMEOUT
-        return "Se agotó el tiempo para obtener tu ubicación. Esto puede deberse a:\n• Señal GPS débil\n• Dispositivo en interior sin acceso a GPS\n• Intenta nuevamente en unos segundos";
-      default:
-        return `Error desconocido (código ${error.code}) al obtener la ubicación. Mostrando todas las ubicaciones disponibles.`;
-    }
+  const calculateDistance = (
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number,
+  ): number => {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * (Math.PI / 180);
+    const dLon = (lon2 - lon1) * (Math.PI / 180);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * (Math.PI / 180)) *
+        Math.cos(lat2 * (Math.PI / 180)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const d = R * c;
+    return Math.round(d * 10) / 10;
   };
 
   const getCurrentLocation = () => {
@@ -107,15 +80,14 @@ export const Map = ({ onBack }: MapProps) => {
     // Debug info
     console.log("Iniciando geolocalización...", {
       protocolo: location.protocol,
-      hostname: location.hostname,
-      navegador: navigator.userAgent.slice(0, 50) + "...",
-      geolocationDisponible: !!navigator.geolocation,
+      geolocationDisponible: isGeolocationSupported(),
+      contextoSeguro: isSecureContext(),
     });
 
     // Check if geolocation is available
-    if (!navigator.geolocation) {
+    if (!isGeolocationSupported()) {
       const message =
-        "La geolocalización no está disponible en este navegador. Esto puede ocurrir en navegadores muy antiguos o en modo privado/incógnito.";
+        "Tu navegador no soporta geolocalización. Mostrando todas las ubicaciones disponibles.";
       console.error("Geolocalización no disponible");
       setMapState((prev) => ({
         ...prev,
@@ -126,12 +98,8 @@ export const Map = ({ onBack }: MapProps) => {
       return;
     }
 
-    // Check if we're on HTTPS (required for geolocation in many browsers)
-    if (
-      location.protocol !== "https:" &&
-      location.hostname !== "localhost" &&
-      location.hostname !== "127.0.0.1"
-    ) {
+    // Check if we're in a secure context
+    if (!isSecureContext()) {
       const message =
         "La geolocalización requiere una conexión segura (HTTPS) en la mayoría de navegadores modernos. También funciona en localhost para desarrollo.";
       console.error("Protocolo inseguro detectado:", location.protocol);
@@ -144,8 +112,22 @@ export const Map = ({ onBack }: MapProps) => {
       return;
     }
 
+    // Timeout adicional como fallback
+    const timeoutId = setTimeout(() => {
+      console.warn("⚠️ Timeout adicional de geolocalización activado");
+      setMapState((prev) => ({
+        ...prev,
+        isLoading: false,
+        error:
+          "Se agotó el tiempo para obtener tu ubicación. Mostrando todas las ubicaciones disponibles.",
+        pointsOfInterest: mockPointsOfInterest,
+      }));
+    }, 25000);
+
     navigator.geolocation.getCurrentPosition(
       (position) => {
+        clearTimeout(timeoutId);
+
         console.log("✅ Geolocalización exitosa:", {
           latitud: position.coords.latitude,
           longitud: position.coords.longitude,
@@ -159,7 +141,6 @@ export const Map = ({ onBack }: MapProps) => {
           accuracy: position.coords.accuracy,
         };
 
-        // Calcular distancias y ordenar por proximidad
         const pointsWithDistance = mockPointsOfInterest
           .map((point) => ({
             ...point,
@@ -185,11 +166,23 @@ export const Map = ({ onBack }: MapProps) => {
         }));
       },
       (error) => {
-        const errorMessage = getGeolocationErrorMessage(error);
+        clearTimeout(timeoutId);
+
+        // Enhanced error handling to prevent [object Object]
+        let errorMessage;
+        try {
+          errorMessage = getGeolocationErrorMessage(error);
+        } catch (e) {
+          console.error("Error processing geolocation error:", e);
+          errorMessage =
+            "Error al obtener la ubicación. Mostrando todas las ubicaciones disponibles.";
+        }
+
         console.error("❌ Error de geolocalización:", {
-          código: error.code,
-          mensaje: error.message,
+          código: error?.code || "N/A",
+          mensaje: error?.message || "N/A",
           descripción: errorMessage,
+          errorCompleto: error,
         });
 
         setMapState((prev) => ({
@@ -199,28 +192,8 @@ export const Map = ({ onBack }: MapProps) => {
           pointsOfInterest: mockPointsOfInterest,
         }));
       },
-      {
-        enableHighAccuracy: false, // false para mejor compatibilidad y velocidad
-        timeout: 20000, // 20 segundos para dar más tiempo
-        maximumAge: 300000, // 5 minutos - usa ubicación cacheada si está disponible
-      },
+      getGeolocationOptions(),
     );
-
-    // Agregar timeout adicional como fallback
-    setTimeout(() => {
-      if (mapState.isLoading) {
-        console.warn(
-          "⚠️ Timeout adicional alcanzado, mostrando ubicaciones sin geolocalización",
-        );
-        setMapState((prev) => ({
-          ...prev,
-          isLoading: false,
-          error:
-            "La geolocalización está tomando demasiado tiempo. Mostrando todas las ubicaciones disponibles.",
-          pointsOfInterest: mockPointsOfInterest,
-        }));
-      }
-    }, 25000); // 25 segundos como fallback absoluto
   };
 
   const filteredPoints = mapState.pointsOfInterest.filter(
@@ -231,84 +204,94 @@ export const Map = ({ onBack }: MapProps) => {
     setMapState((prev) => ({ ...prev, selectedPoint: point }));
   };
 
-  const openInMaps = (point: PetPointOfInterest) => {
-    const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${point.location.latitude},${point.location.longitude}`;
-    window.open(mapsUrl, "_blank");
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case "shelter":
+        return "🏠";
+      case "vet":
+        return "🏥";
+      case "store":
+        return "🛒";
+      case "park":
+        return "🌳";
+      default:
+        return "📍";
+    }
+  };
+
+  const getTypeLabel = (type: string) => {
+    switch (type) {
+      case "shelter":
+        return "Refugio";
+      case "vet":
+        return "Veterinaria";
+      case "store":
+        return "Tienda";
+      case "park":
+        return "Parque";
+      default:
+        return type;
+    }
+  };
+
+  // Safe error display function to prevent [object Object]
+  const renderError = (error: string | null) => {
+    if (!error) return null;
+
+    // Ensure we always display a string, never [object Object]
+    const safeError =
+      typeof error === "string"
+        ? error
+        : "Error al obtener la ubicación. Mostrando todas las ubicaciones disponibles.";
+
+    return safeError;
   };
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-slate-100 via-blue-50 to-indigo-100 relative overflow-hidden">
-      {/* Animated background */}
+    <div className="min-h-screen w-full bg-gradient-to-br from-blue-600 via-cyan-700 to-teal-800 relative overflow-hidden">
+      {/* Static background - no animations */}
       <div className="absolute inset-0">
-        <div className="absolute top-20 left-20 w-72 h-72 bg-gradient-to-r from-blue-200 to-indigo-300 rounded-full opacity-10 blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-20 w-96 h-96 bg-gradient-to-r from-purple-200 to-pink-300 rounded-full opacity-10 blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-r from-indigo-200 to-blue-300 rounded-full opacity-8 blur-3xl animate-pulse delay-500"></div>
+        <div className="absolute top-20 left-20 w-64 h-64 bg-white rounded-full opacity-10 blur-3xl"></div>
+        <div className="absolute bottom-20 right-20 w-80 h-80 bg-white rounded-full opacity-10 blur-3xl"></div>
       </div>
 
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-6 py-8">
+      <div className="relative z-10 w-full max-w-6xl mx-auto px-6 py-8">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -50 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between mb-8"
-        >
-          <div className="flex items-center gap-4">
-            <Button
-              onClick={onBack}
-              variant="ghost"
-              size="lg"
-              className="bg-white/80 backdrop-blur-md text-gray-700 hover:bg-white/90 rounded-2xl shadow-lg border border-white/60"
-            >
-              <ArrowLeft className="w-6 h-6" />
-            </Button>
-            <div className="flex items-center gap-4">
-              {/* Logo pequeño para Map */}
-              <div className="relative w-12 h-12 lg:w-16 lg:h-16">
-                <div className="absolute inset-0 bg-gradient-to-br from-pink-400 via-rose-500 to-purple-600 rounded-2xl shadow-lg">
-                  <div className="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent rounded-2xl" />
-                </div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <PawPrint className="w-6 h-6 lg:w-8 lg:h-8 text-white fill-current drop-shadow-sm" />
-                </div>
-                <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full shadow-sm flex items-center justify-center">
-                  <MapPin className="w-2 h-2 text-white" />
-                </div>
-              </div>
-
-              <div>
-                <h1 className="text-4xl lg:text-5xl font-black text-gray-800 drop-shadow-sm">
-                  Mapa Pet
-                </h1>
-                <p className="text-xl text-gray-600 mt-2">
-                  Encuentra lugares para tu mascota cerca de ti
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Button
-              onClick={getCurrentLocation}
-              disabled={mapState.isLoading}
-              className="bg-white/80 backdrop-blur-md text-gray-700 hover:bg-white/90 rounded-2xl px-6 py-3 shadow-lg border border-white/60"
-            >
-              {mapState.isLoading ? (
-                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-              ) : (
-                <Navigation className="w-5 h-5 mr-2" />
-              )}
-              Mi ubicación
-            </Button>
-          </motion.div>
-        </motion.div>
-
-        {/* Error message */}
-        {mapState.error && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-orange-100 backdrop-blur-md text-orange-800 p-6 rounded-2xl mb-6 border border-orange-200 shadow-lg"
+        <div className="flex items-center justify-between mb-8">
+          <Button
+            onClick={onBack}
+            size="lg"
+            className="bg-white/20 backdrop-blur-md hover:bg-white/30 text-white border border-white/30 shadow-xl"
           >
+            <ArrowLeft className="w-6 h-6 mr-2" />
+            Volver
+          </Button>
+          <div className="text-center">
+            <h1 className="text-4xl lg:text-6xl font-black text-white mb-2">
+              🗺️ Mapa de Mascotas
+            </h1>
+            <p className="text-xl text-white/80">
+              Encuentra refugios, veterinarias y más cerca de ti
+            </p>
+          </div>
+          <Button
+            onClick={getCurrentLocation}
+            disabled={mapState.isLoading}
+            size="lg"
+            className="bg-blue-500 hover:bg-blue-600 text-white border-0 shadow-xl"
+          >
+            {mapState.isLoading ? (
+              <Loader2 className="w-6 h-6 mr-2 animate-spin" />
+            ) : (
+              <Navigation className="w-6 h-6 mr-2" />
+            )}
+            Mi ubicación
+          </Button>
+        </div>
+
+        {/* Error message with safe rendering */}
+        {mapState.error && (
+          <div className="bg-orange-100 backdrop-blur-md text-orange-800 p-6 rounded-2xl mb-6 border border-orange-200 shadow-lg">
             <div className="flex items-start gap-4">
               <AlertCircle className="w-6 h-6 mt-1 flex-shrink-0" />
               <div className="flex-1">
@@ -316,7 +299,7 @@ export const Map = ({ onBack }: MapProps) => {
                   Problema con la ubicación
                 </h3>
                 <p className="mb-4 text-orange-700 whitespace-pre-line">
-                  {mapState.error}
+                  {renderError(mapState.error)}
                 </p>
                 <div className="flex gap-3">
                   <Button
@@ -345,357 +328,129 @@ export const Map = ({ onBack }: MapProps) => {
                 </div>
               </div>
             </div>
-          </motion.div>
-        )}
-
-        {/* Geolocation help section */}
-        {!mapState.userLocation && !mapState.isLoading && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="bg-blue-50 backdrop-blur-xl rounded-3xl p-6 mb-8 border border-blue-200 shadow-lg"
-          >
-            <div className="flex items-start gap-4">
-              <Info className="w-6 h-6 text-blue-600 mt-1 flex-shrink-0" />
-              <div>
-                <h3 className="text-xl font-bold text-gray-800 mb-3">
-                  💡 ¿Cómo habilitar la ubicación?
-                </h3>
-                <div className="space-y-2 text-gray-700">
-                  <p>
-                    • <strong>Chrome/Edge:</strong> Haz clic en el ícono de
-                    ubicación en la barra de direcciones
-                  </p>
-                  <p>
-                    • <strong>Firefox:</strong> Haz clic en "Compartir
-                    ubicación" cuando aparezca el mensaje
-                  </p>
-                  <p>
-                    • <strong>Safari:</strong> Ve a Configuración → Privacidad →
-                    Servicios de ubicación
-                  </p>
-                  <p>
-                    • <strong>Móvil:</strong> Permite el acceso a la ubicación
-                    en la configuración del navegador
-                  </p>
-                </div>
-                <div className="mt-4 p-3 bg-blue-100 rounded-xl border border-blue-200">
-                  <p className="text-sm text-blue-800">
-                    <HelpCircle className="w-4 h-4 inline mr-1" />
-                    Tu ubicación se usa solo para mostrar lugares cercanos. No
-                    se guarda ni se comparte.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </motion.div>
+          </div>
         )}
 
         {/* Filter buttons */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-white/70 backdrop-blur-2xl rounded-3xl p-4 mb-8 shadow-lg border border-white/40"
-        >
-          <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-3 justify-center mb-8">
+          {[
+            { key: "all", label: "Todos", icon: "🗺️" },
+            { key: "shelter", label: "Refugios", icon: "🏠" },
+            { key: "vet", label: "Veterinarias", icon: "🏥" },
+            { key: "store", label: "Tiendas", icon: "🛒" },
+            { key: "park", label: "Parques", icon: "🌳" },
+          ].map((filterOption) => (
             <Button
-              onClick={() => setFilter("all")}
-              className={cn(
-                "rounded-2xl font-bold transition-all duration-300",
-                filter === "all"
-                  ? "bg-indigo-500 text-white shadow-lg"
-                  : "bg-white/60 text-gray-700 hover:bg-white/80 shadow-sm",
-              )}
+              key={filterOption.key}
+              onClick={() => setFilter(filterOption.key)}
+              className={`${
+                filter === filterOption.key
+                  ? "bg-white text-blue-600 shadow-xl"
+                  : "bg-white/20 text-white hover:bg-white/30 border border-white/30"
+              } backdrop-blur-md rounded-xl transition-all duration-300`}
             >
-              <MapPin className="w-5 h-5 mr-2" />
-              Todos
+              <span className="mr-2">{filterOption.icon}</span>
+              {filterOption.label}
             </Button>
-            {Object.entries(typeLabels).map(([type, label]) => {
-              const Icon = typeIcons[type as keyof typeof typeIcons];
-              return (
-                <Button
-                  key={type}
-                  onClick={() => setFilter(type)}
-                  className={cn(
-                    "rounded-2xl font-bold transition-all duration-300",
-                    filter === type
-                      ? "bg-indigo-500 text-white shadow-lg"
-                      : "bg-white/60 text-gray-700 hover:bg-white/80 shadow-sm",
-                  )}
-                >
-                  <Icon className="w-5 h-5 mr-2" />
-                  {label}
-                </Button>
-              );
-            })}
-          </div>
-        </motion.div>
+          ))}
+        </div>
 
-        {/* Location stats */}
-        {mapState.userLocation && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="bg-white/70 backdrop-blur-xl rounded-3xl p-6 mb-8 border border-white/40 shadow-lg"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-2xl font-bold text-gray-800 mb-2">
-                  📍 Tu ubicación detectada
-                </h3>
-                <p className="text-gray-700">
-                  Encontramos {filteredPoints.length} lugares{" "}
-                  {filter !== "all" &&
-                    `de tipo ${typeLabels[filter as keyof typeof typeLabels]}`}{" "}
-                  cerca de ti
-                </p>
-              </div>
-              <div className="text-right">
-                <div className="text-3xl font-black text-gray-800">
-                  {filteredPoints.length}
-                </div>
-                <div className="text-gray-600">lugares</div>
-              </div>
-            </div>
-          </motion.div>
-        )}
+        {/* Points list */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredPoints.map((point) => (
+            <Card
+              key={point.id}
+              className="bg-white/10 backdrop-blur-lg border-white/20 shadow-xl cursor-pointer hover:bg-white/20 transition-all duration-300 overflow-hidden"
+              onClick={() => handlePointSelect(point)}
+            >
+              <CardContent className="p-6">
+                <div className="flex items-start gap-4">
+                  <div className="text-3xl">{getTypeIcon(point.type)}</div>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-xl font-bold text-white">
+                        {point.name}
+                      </h3>
+                      {point.distance && (
+                        <Badge className="bg-blue-500 text-white">
+                          {point.distance}km
+                        </Badge>
+                      )}
+                    </div>
 
-        {/* Points of interest grid */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.6 }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-        >
-          <AnimatePresence>
-            {filteredPoints.map((point, index) => {
-              const Icon = typeIcons[point.type];
-              return (
-                <motion.div
-                  key={point.id}
-                  initial={{ opacity: 0, y: 50 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -50 }}
-                  transition={{ delay: index * 0.1 }}
-                  whileHover={{ scale: 1.02 }}
-                  className="group"
-                >
-                  <Card className="bg-white/80 backdrop-blur-xl border-white/40 hover:bg-white/90 transition-all duration-300 overflow-hidden shadow-lg">
-                    <CardHeader className="pb-4">
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-center gap-3">
-                          <div
-                            className={cn(
-                              "w-12 h-12 rounded-2xl bg-gradient-to-r flex items-center justify-center",
-                              typeColors[point.type],
-                            )}
-                          >
-                            <Icon className="w-6 h-6 text-white" />
-                          </div>
-                          <div>
-                            <CardTitle className="text-gray-800 text-lg leading-tight">
-                              {point.name}
-                            </CardTitle>
-                            <Badge
-                              variant="secondary"
-                              className="mt-1 bg-gray-100 text-gray-700 border-gray-300"
-                            >
-                              {typeLabels[point.type]}
-                            </Badge>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {point.distance && (
-                            <Badge className="bg-blue-500/20 text-blue-100 border-blue-400/30">
-                              {point.distance.toFixed(1)} km
-                            </Badge>
-                          )}
-                          <div
-                            className={cn(
-                              "w-3 h-3 rounded-full",
-                              point.isOpen ? "bg-green-400" : "bg-red-400",
-                            )}
-                          />
-                        </div>
-                      </div>
-                    </CardHeader>
+                    <p className="text-white/80 mb-3 line-clamp-2">
+                      {point.description}
+                    </p>
 
-                    <CardContent className="space-y-4">
-                      <CardDescription className="text-gray-600 text-sm">
-                        {point.description}
-                      </CardDescription>
-
-                      <div className="flex items-center gap-2">
-                        <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                        <span className="text-gray-800 font-medium">
-                          {point.rating}
-                        </span>
-                        <span className="text-gray-600">
-                          • {point.isOpen ? "Abierto" : "Cerrado"}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-white/70 text-sm">
                         <MapPin className="w-4 h-4" />
-                        <span className="truncate">{point.address}</span>
+                        <span>{point.address}</span>
                       </div>
 
                       {point.phone && (
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <div className="flex items-center gap-2 text-white/70 text-sm">
                           <Phone className="w-4 h-4" />
                           <span>{point.phone}</span>
                         </div>
                       )}
 
-                      <div className="flex gap-2 pt-2">
-                        <Button
-                          onClick={() => openInMaps(point)}
-                          size="sm"
-                          className="flex-1 bg-indigo-500 text-white hover:bg-indigo-600 rounded-xl shadow-md"
-                        >
-                          <Navigation className="w-4 h-4 mr-2" />
-                          Ir
-                        </Button>
-
-                        <Button
-                          onClick={() => handlePointSelect(point)}
-                          size="sm"
-                          variant="outline"
-                          className="bg-white text-indigo-600 border-indigo-300 hover:bg-indigo-50 rounded-xl"
-                        >
-                          <Clock className="w-4 h-4 mr-2" />
-                          Info
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              );
-            })}
-          </AnimatePresence>
-        </motion.div>
-
-        {/* Selected point modal */}
-        <AnimatePresence>
-          {mapState.selectedPoint && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-              onClick={() =>
-                setMapState((prev) => ({ ...prev, selectedPoint: null }))
-              }
-            >
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.8 }}
-                onClick={(e) => e.stopPropagation()}
-                className="bg-white/90 backdrop-blur-2xl rounded-3xl p-8 max-w-md w-full border border-white/40 shadow-2xl"
-              >
-                <div className="flex items-center gap-4 mb-6">
-                  <div
-                    className={cn(
-                      "w-16 h-16 rounded-3xl bg-gradient-to-r flex items-center justify-center",
-                      typeColors[mapState.selectedPoint.type],
-                    )}
-                  >
-                    {React.createElement(
-                      typeIcons[mapState.selectedPoint.type],
-                      {
-                        className: "w-8 h-8 text-white",
-                      },
-                    )}
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-bold text-gray-800">
-                      {mapState.selectedPoint.name}
-                    </h3>
-                    <Badge className="mt-1 bg-gray-100 text-gray-700 border-gray-300">
-                      {typeLabels[mapState.selectedPoint.type]}
-                    </Badge>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <p className="text-gray-700">
-                    {mapState.selectedPoint.description}
-                  </p>
-
-                  {mapState.selectedPoint.openHours && (
-                    <div>
-                      <h4 className="text-gray-800 font-bold mb-2">
-                        Horarios:
-                      </h4>
-                      <div className="space-y-1">
-                        {Object.entries(mapState.selectedPoint.openHours).map(
-                          ([day, hours]) => (
-                            <div
-                              key={day}
-                              className="flex justify-between text-sm text-gray-600"
-                            >
-                              <span>{day}:</span>
-                              <span>{hours}</span>
-                            </div>
-                          ),
-                        )}
-                      </div>
+                      {point.hours && (
+                        <div className="flex items-center gap-2 text-white/70 text-sm">
+                          <Clock className="w-4 h-4" />
+                          <span>{point.hours}</span>
+                        </div>
+                      )}
                     </div>
-                  )}
 
-                  <div className="flex gap-3 pt-4">
-                    <Button
-                      onClick={() => openInMaps(mapState.selectedPoint!)}
-                      className="flex-1 bg-indigo-500 text-white hover:bg-indigo-600 rounded-2xl shadow-md"
-                    >
-                      <Navigation className="w-5 h-5 mr-2" />
-                      Abrir en Maps
-                    </Button>
-
-                    {mapState.selectedPoint.website && (
-                      <Button
-                        onClick={() =>
-                          window.open(mapState.selectedPoint!.website, "_blank")
-                        }
-                        variant="outline"
-                        className="bg-white text-indigo-600 border-indigo-300 hover:bg-indigo-50 rounded-2xl"
+                    <div className="flex items-center justify-between mt-4">
+                      <Badge
+                        className={`${
+                          point.type === "shelter"
+                            ? "bg-green-500"
+                            : point.type === "vet"
+                              ? "bg-red-500"
+                              : point.type === "store"
+                                ? "bg-purple-500"
+                                : "bg-blue-500"
+                        } text-white`}
                       >
-                        <Globe className="w-5 h-5" />
-                      </Button>
-                    )}
+                        {getTypeLabel(point.type)}
+                      </Badge>
+
+                      {point.rating && (
+                        <div className="flex items-center gap-1">
+                          <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                          <span className="text-white font-semibold">
+                            {point.rating}
+                          </span>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
 
-        {/* Loading state */}
-        {mapState.isLoading && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 flex items-center justify-center"
-          >
-            <div className="bg-white/90 backdrop-blur-2xl rounded-3xl p-8 text-center border border-white/40 max-w-md mx-4 shadow-2xl">
-              <Loader2 className="w-12 h-12 text-indigo-600 animate-spin mx-auto mb-4" />
-              <h3 className="text-gray-800 text-xl font-bold mb-2">
-                Obteniendo tu ubicación...
-              </h3>
-              <p className="text-gray-600 text-sm mb-4">
-                Si tu navegador solicita permiso, por favor selecciona
-                "Permitir"
-              </p>
-              <div className="flex items-center justify-center gap-2 text-gray-500 text-xs">
-                <Clock className="w-4 h-4" />
-                <span>Esto puede tomar unos segundos</span>
-              </div>
-            </div>
-          </motion.div>
+        {filteredPoints.length === 0 && (
+          <div className="text-center py-20">
+            <div className="text-8xl mb-6">🔍</div>
+            <h2 className="text-4xl font-bold text-white mb-4">
+              No hay lugares de este tipo
+            </h2>
+            <p className="text-xl text-white/80 mb-8">
+              Intenta con otro filtro o revisa todos los lugares disponibles
+            </p>
+            <Button
+              onClick={() => setFilter("all")}
+              size="lg"
+              className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4 font-bold shadow-xl"
+            >
+              Ver todos los lugares
+            </Button>
+          </div>
         )}
       </div>
     </div>

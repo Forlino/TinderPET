@@ -111,36 +111,10 @@ export const UserProfileForm = ({
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-violet-600 via-purple-700 to-indigo-800 relative overflow-hidden">
-      {/* Animated background elements */}
+      {/* Static background - no animations */}
       <div className="absolute inset-0">
-        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-purple-600/30 via-violet-600/20 to-indigo-600/30"></div>
-        <div className="absolute top-20 left-20 w-72 h-72 bg-gradient-to-r from-purple-400 to-violet-500 rounded-full opacity-20 blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-20 w-96 h-96 bg-gradient-to-r from-indigo-400 to-purple-500 rounded-full opacity-20 blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-r from-violet-400 to-purple-500 rounded-full opacity-15 blur-3xl animate-pulse delay-500"></div>
-
-        {/* Floating icons */}
-        {[...Array(8)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute text-4xl opacity-20"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-            }}
-            animate={{
-              y: [0, -60, 0],
-              opacity: [0.2, 0.5, 0.2],
-              rotate: [0, 360],
-            }}
-            transition={{
-              duration: 6 + Math.random() * 3,
-              repeat: Infinity,
-              delay: Math.random() * 2,
-            }}
-          >
-            ✨
-          </motion.div>
-        ))}
+        <div className="absolute top-20 left-20 w-64 h-64 bg-white rounded-full opacity-15 blur-3xl"></div>
+        <div className="absolute bottom-20 right-20 w-80 h-80 bg-white rounded-full opacity-15 blur-3xl"></div>
       </div>
 
       <div className="relative z-10 max-w-4xl mx-auto px-8 py-8">
